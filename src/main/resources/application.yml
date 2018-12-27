@@ -1,0 +1,15 @@
+
+server:
+  port: 80 #为了以后访问项目不用写端口号
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.1.55:3306/restapi?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    username: test
+    password: abcd1234@
+    hikari:
+      leakDetectionThreshold: 3000
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: false
