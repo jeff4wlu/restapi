@@ -1,6 +1,8 @@
-package com.jeff4w.example.restapi.common;
+package com.jeff4w.example.restapi.common.Restful;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * @author Lu Weijian
@@ -11,12 +13,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 //前端的同事要求说尽量不要有null，可有为空串“” 或者 0 或者 []， 但尽量不要null。
 //实体类与json互转的时候 属性值为null的不参与序列化
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@ApiModel(value = "返回类")
 public class ResponseResult<T> {
 
+    @ApiModelProperty(value = "结果")
     private boolean result;
-
+    @ApiModelProperty(value = "结果描述")
     private String message;
-
+    @ApiModelProperty(value = "结果数据")
     private T data;
 
     public void setResult(boolean result) {

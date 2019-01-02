@@ -1,4 +1,6 @@
-package com.jeff4w.example.restapi.common;
+package com.jeff4w.example.restapi.common.Restful;
+
+import com.jeff4w.example.restapi.common.ErrorCode;
 
 /**
  * @author Lu Weijian

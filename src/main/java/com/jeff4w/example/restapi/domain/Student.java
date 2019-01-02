@@ -14,14 +14,14 @@ import javax.validation.constraints.NotEmpty;
 @Table(name = "t_student") // 数据库表名
 public class Student {
     @Id // 主键
-    @GeneratedValue // 自增
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 自增
     private Integer id;
 
     @NotEmpty(message = "学生姓名不能为空") // 表单验证
-    @Column(length = 20) // 字段长度
-    private String t_name;
+    @Column(name = "name", length = 20, nullable = false) // 字段长度
+    private String name;
 
-    @Column(length = 20) // 字段长度
+    @Column(name = "major", length = 20) // 字段长度
     private String major;
 
     public Integer getId() {
@@ -32,12 +32,12 @@ public class Student {
         this.id = id;
     }
 
-    public String getT_name() {
-        return t_name;
+    public String getName() {
+        return name;
     }
 
-    public void setT_name(String t_name) {
-        this.t_name = t_name;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getMajor() {

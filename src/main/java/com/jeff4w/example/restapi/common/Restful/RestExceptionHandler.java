@@ -1,5 +1,6 @@
-package com.jeff4w.example.restapi.common;
+package com.jeff4w.example.restapi.common.Restful;
 
+import com.jeff4w.example.restapi.common.ErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

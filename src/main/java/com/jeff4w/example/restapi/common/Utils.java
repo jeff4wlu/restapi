@@ -7,8 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by kaenry on 2016/9/20.
- * Utils
+ * @author Lu Weijian
+ * @description 备注
+ * @email lwj@kapark.cn
+ * @date 2018-12-29 15:10
  */
 public class Utils {
 
@@ -26,12 +28,12 @@ public class Utils {
     }
 
     // java 1.8 lambda
-//    public static String[] getNullPropertyNames(Object source) {
-//        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
-//        return Stream.of(wrappedSource.getPropertyDescriptors())
-//                .map(FeatureDescriptor::getName)
-//                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
-//                .toArray(String[]::new);
-//    }
+    //    public static String[] getNullPropertyNames(Object source) {
+    //        final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
+    //        return Stream.of(wrappedSource.getPropertyDescriptors())
+    //                .map(FeatureDescriptor::getName)
+    //                .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
+    //                .toArray(String[]::new);
+    //    }
 
 }

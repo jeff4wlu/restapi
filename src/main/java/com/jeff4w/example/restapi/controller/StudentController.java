@@ -1,10 +1,14 @@
 package com.jeff4w.example.restapi.controller;
 
-import com.jeff4w.example.restapi.common.ResponseResult;
-import com.jeff4w.example.restapi.common.RestResultGenerator;
+import com.jeff4w.example.restapi.common.Restful.ResponseResult;
+import com.jeff4w.example.restapi.common.Restful.RestResultGenerator;
 import com.jeff4w.example.restapi.common.Utils;
 import com.jeff4w.example.restapi.domain.Student;
 import com.jeff4w.example.restapi.service.StudentService;
+import io.swagger.annotations.*;
+import org.apache.shiro.authz.annotation.Logical;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/student")
+@Api("学生信息api")
 public class StudentController {
 
     @Autowired
@@ -32,8 +37,14 @@ public class StudentController {
      *
      * @return
      */
+    @ApiOperation(value = "查询全部学生信息",notes = "查询全部学生信息")
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @GetMapping(value = "")
-    public ResponseResult<List<Student>> findAllStudent() {
+    @RequiresAuthentication
+    public ResponseResult<List<Student>> findAllStudent() throws Exception {
         List<Student> all = studentService.findAllStudent();
         return RestResultGenerator.genSuccessResult(all);
     }
@@ -46,8 +57,15 @@ public class StudentController {
      * @param id
      * @return
      */
+    @ApiOperation(value = "根据id查询学生的信息",notes = "查询数据库中某个学生的信息")
+    @ApiImplicitParam(name ="id",value = "学生id",paramType = "path",required = true,dataType = "Long")
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @GetMapping(value = "/{id}")
-    public ResponseResult<Student> findStudent(@PathVariable("id") Integer id) {
+    @RequiresPermissions(logical = Logical.OR, value = {"userInfo:view", "edit"})
+    public ResponseResult<Student> findStudent(@PathVariable Integer id) throws Exception {
         Student student = studentService.findStudentById(id).get();
         return RestResultGenerator.genSuccessResult(student);
     }
@@ -60,8 +78,14 @@ public class StudentController {
      *
      * @param id
      */
+    @ApiOperation(value = "根据id删除学生的信息",notes = "删除数据库中某个学生的信息")
+    @ApiImplicitParam(name ="id",value = "学生id",paramType = "path",required = true,dataType = "Long")
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @DeleteMapping(value = "/{id}")
-    public ResponseResult deleteStudent(@PathVariable Integer id) {
+    public ResponseResult deleteStudent(@PathVariable Integer id) throws Exception {
         studentService.delStudentById(id);
         return RestResultGenerator.genSuccessResult();
     }
@@ -74,8 +98,14 @@ public class StudentController {
      *
      * @param student
      */
+    @ApiOperation(value = "新增学生的信息",notes = "新增数据库中某个学生的全部信息")
+    @ApiImplicitParam(name ="student",value = "学生实体对象",paramType = "body",required = true,dataType = "Student")
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @PostMapping(value = "")
-    public ResponseResult<Student> addStudent(@Valid @RequestBody Student student) {
+    public ResponseResult<Student> addStudent(@Valid @RequestBody Student student) throws Exception {
         Student save = studentService.addStudent(student);
         return RestResultGenerator.genSuccessResult(save);
     }
@@ -88,8 +118,17 @@ public class StudentController {
      *
      * @param student
      */
+    @ApiOperation(value = "根据id更新学生的全部信息",notes = "更新数据库中某个学生的全部信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id",value = "学生id",dataType = "Long",paramType = "path",example = "1112"),
+            @ApiImplicitParam(name = "newStudent",value = "学生实体对象",dataType = "Student",paramType = "body",example = "1112")
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @PutMapping(value = "/{id}")
-    public ResponseResult<Student> updateStudentAll(@PathVariable Integer id, @Valid @RequestBody Student newStudent) {
+    public ResponseResult<Student> updateStudentAll(@PathVariable Integer id, @Valid @RequestBody Student newStudent) throws Exception {
         Student student = studentService.findStudentById(id).get();
         // copy all new user props to user except id
         BeanUtils.copyProperties(newStudent, student, "id");
@@ -98,6 +137,15 @@ public class StudentController {
         return RestResultGenerator.genSuccessResult(student);
     }
 
+    @ApiOperation(value = "根据id更新学生的部分信息",notes = "更新数据库中某个学生的部分信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id",value = "学生id",dataType = "Long",paramType = "path",example = "1112"),
+            @ApiImplicitParam(name = "newStudent",value = "学生实体对象",dataType = "Student",paramType = "body",example = "1112")
+    })
+    @ApiResponses({
+            @ApiResponse(code=400,message = "请求参数没有填好"),
+            @ApiResponse(code=404,message="请求路径没有找到")
+    })
     @PatchMapping(value = "/{id}")
     public ResponseResult<Student> update(@PathVariable Integer id, @Valid @RequestBody Student newStudent) throws Exception {
         Student student = studentService.findStudentById(id).get();
