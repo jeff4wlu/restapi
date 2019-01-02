@@ -37,19 +37,6 @@ public class Swagger2Config {
                 .build()
                 .securitySchemes(securitySchemes())
                 .securityContexts(securityContexts());
-
-
-    }
-
-
-
-    private ApiInfo apiInfo() {
-        return new ApiInfoBuilder()
-                .title("swagger-api文档")
-                .description("swagger接入教程")
-                .version("1.0")
-                .contact(new Contact("Lu Weijian", "", "jeff4w@163.com"))
-                .build();
     }
 
     private List<ApiKey> securitySchemes() {
@@ -66,6 +53,15 @@ public class Swagger2Config {
                         .forPaths(regex("^(?!auth).*$"))
                         .build());
         return securityContexts;
+    }
+
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("swagger-api文档")
+                .description("swagger接入教程")
+                .version("1.0")
+                .contact(new Contact("Lu Weijian", "", "jeff4w@163.com"))
+                .build();
     }
 
     List<SecurityReference> defaultAuth() {
