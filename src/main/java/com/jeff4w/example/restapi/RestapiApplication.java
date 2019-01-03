@@ -20,7 +20,6 @@ public class RestapiApplication {
         return jedisPool;
     }
 
-
     @Bean
     public RedisManager redisManager(JedisPool jedisPool){
         RedisManager redisManager = new RedisManager();

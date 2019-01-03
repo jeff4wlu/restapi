@@ -36,7 +36,8 @@ public class WelcomeController {
         UserInfo userInfo = userInfoService.findByUsername(username);
         if (userInfo.getPassword().equals(password)) {
             String flashToken = JWTUtil.sign(username, password);
-            redisManager.getJedisPool().getResource().set(flashToken, username,"NX", "EX",300);
+            String tmp = redisManager.getJedisPool().getResource().setex(username, 300, flashToken);
+            redisManager.getJedisPool().getResource().close();
             return RestResultGenerator.genSuccessResult(flashToken);
         } else {
             throw new UnauthorizedException();

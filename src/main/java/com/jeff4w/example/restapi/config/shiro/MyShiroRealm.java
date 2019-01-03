@@ -43,27 +43,37 @@ public class MyShiroRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
         System.out.println("MyShiroRealm.doGetAuthenticationInfo()");
+        String token = null;
+        try{
+            // 获取用户的输入帐号
+            token = (String) auth.getCredentials();
+            String username = JWTUtil.getUsername(token);
+            //先从cache中找token，如果无则超时，需要继续判断是否要刷新token
+            String cacheToken = redisManager.getJedisPool().getResource().get(username);
+            if (cacheToken == null) {
+                //cache已超时，username只能从客户端传入的token中解码出来
+                UserInfo userInfo = userInfoService.findByUsername(username);
+                if (userInfo == null) {
+                    throw new AuthenticationException("User didn't existed!");
+                }
+                if (!JWTUtil.verify(token, username, userInfo.getPassword())) {
+                    throw new AuthenticationException("token超时或不合法");
+                }
+                //刷新token并存入cache和threadholder,并删除旧的token
+                String newToken = JWTUtil.sign(username, userInfo.getPassword());
+                String tmp = redisManager.getJedisPool().getResource().setex(username, 300, newToken);
+                JWTUtil.flashToken.set(newToken);//以便后面API返回给用户时带走新token
+            }
+            if(!cacheToken.equals(token))
+                throw new AuthenticationException("非合法token");
 
-        // 获取用户的输入帐号
-        String token = (String) auth.getCredentials();
-        //先从cache中找token，如果无则超时，需要继续判断是否要刷新token
-        String username = redisManager.getJedisPool().getResource().get(token);
-        if (username == null) {
-            //cache已超时，username只能从客户端传入的token中解码出来
-            username = JWTUtil.getUsername(token);
-            UserInfo userInfo = userInfoService.findByUsername(username);
-            if (userInfo == null) {
-                throw new AuthenticationException("User didn't existed!");
-            }
-            if (!JWTUtil.verify(token, username, userInfo.getPassword())) {
-                throw new AuthenticationException("token超时或不合法");
-            }
-            //刷新token并存入cache和threadholder,并删除旧的token
-            String flashToken = JWTUtil.sign(username, userInfo.getPassword());
-            redisManager.getJedisPool().getResource().del(token);
-            redisManager.getJedisPool().getResource().set(flashToken, username,"NX", "EX",300);
-            JWTUtil.flashToken.set(flashToken);//以便后面API返回给用户时带走新token
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }finally {
+            redisManager.getJedisPool().getResource().close();
         }
+
+        //此处token不能是newToken，因为shiro会把此处的token和用户传入的token做对比
         return new SimpleAuthenticationInfo(token, token, "my_realm");
     }
 
