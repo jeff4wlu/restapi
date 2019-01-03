@@ -14,10 +14,13 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.crazycake.shiro.RedisManager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,32 +34,36 @@ public class MyShiroRealm extends AuthorizingRealm {
     @Resource
     private UserInfoService userInfoService;
 
+    @Autowired
+    private RedisManager redisManager;
+
     /**
      * 认证信息(身份验证) Authentication 是用来验证用户身份
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
         System.out.println("MyShiroRealm.doGetAuthenticationInfo()");
+
         // 获取用户的输入帐号
         String token = (String) auth.getCredentials();
-        // 解密获得username，用于和数据库进行对比
-        String username = JWTUtil.getUsername(token);
+        //先从cache中找token，如果无则超时，需要继续判断是否要刷新token
+        String username = redisManager.getJedisPool().getResource().get(token);
         if (username == null) {
-            throw new AuthenticationException("token invalid");
+            //cache已超时，username只能从客户端传入的token中解码出来
+            username = JWTUtil.getUsername(token);
+            UserInfo userInfo = userInfoService.findByUsername(username);
+            if (userInfo == null) {
+                throw new AuthenticationException("User didn't existed!");
+            }
+            if (!JWTUtil.verify(token, username, userInfo.getPassword())) {
+                throw new AuthenticationException("token超时或不合法");
+            }
+            //刷新token并存入cache和threadholder,并删除旧的token
+            String flashToken = JWTUtil.sign(username, userInfo.getPassword());
+            redisManager.getJedisPool().getResource().del(token);
+            redisManager.getJedisPool().getResource().set(flashToken, username,"NX", "EX",300);
+            JWTUtil.flashToken.set(flashToken);//以便后面API返回给用户时带走新token
         }
-
-        // 通过username从数据库中查找 User对象，如果找到，没找到.
-        // 实际项目中，这里可以根据实际情况做缓存，如果不做，Shiro自己也是有时间间隔机制，2分钟内不会重复执行该方法
-        UserInfo userInfo = userInfoService.findByUsername(username);
-        System.out.println("----->>userInfo=" + userInfo);
-        if (userInfo == null) {
-            throw new AuthenticationException("User didn't existed!");
-        }
-
-        if (!JWTUtil.verify(token, username, userInfo.getPassword())) {
-            throw new AuthenticationException("Username or password error");
-        }
-
         return new SimpleAuthenticationInfo(token, token, "my_realm");
     }
 

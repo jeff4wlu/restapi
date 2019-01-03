@@ -1,6 +1,7 @@
 package com.jeff4w.example.restapi.common.Restful;
 
 import com.jeff4w.example.restapi.common.ErrorCode;
+import com.jeff4w.example.restapi.config.JWT.JWTUtil;
 
 /**
  * @author Lu Weijian
@@ -16,6 +17,8 @@ public class RestResultGenerator {
         result.setResult(success);
         result.setData(data);
         result.setMessage(message);
+        result.setFlashToken(JWTUtil.flashToken.get());//如未超时则返回null
+        JWTUtil.flashToken.remove();//去掉是为了防止线程池时被下次的request错误使用
         return result;
     }
 

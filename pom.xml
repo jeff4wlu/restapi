@@ -67,11 +67,17 @@
             <artifactId>java-jwt</artifactId>
             <version>3.2.0</version>
         </dependency>
-
+        <!-- 使用13版本需要操作系统安装最新的APR -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
             <version>9.0.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.crazycake</groupId>
+            <artifactId>shiro-redis</artifactId>
+            <version>3.2.2</version>
         </dependency>
 
     </dependencies>

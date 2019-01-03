@@ -20,6 +20,8 @@ public class ResponseResult<T> {
     private boolean result;
     @ApiModelProperty(value = "结果描述")
     private String message;
+    @ApiModelProperty(value = "jwt token信息")
+    private String flashToken;
     @ApiModelProperty(value = "结果数据")
     private T data;
 
@@ -40,9 +42,15 @@ public class ResponseResult<T> {
     }
 
     public void setData(T data) {
-
         this.data = data;
+    }
 
+    public String getFlashToken() {
+        return flashToken;
+    }
+
+    public void setFlashToken(String flashToken) {
+        this.flashToken = flashToken;
     }
 
     public ResponseResult() {

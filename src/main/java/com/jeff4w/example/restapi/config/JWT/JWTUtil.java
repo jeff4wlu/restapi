@@ -17,11 +17,17 @@ import java.util.Date;
  */
 public class JWTUtil {
 
-    // 过期时间5分钟
-    private static final long EXPIRE_TIME = 50*60*1000;
+    //保存flashToken
+    public static ThreadLocal<String> flashToken = new ThreadLocal<String>() {
+        @Override
+        protected String initialValue() {
+            return null;
+        }
+    };
 
-    //公共密匙
-    private static final String SECRET = "XX#$%()(#*!()!KL<><MQLMNQNQJQK sdfkjsdrow32234545fdf>?N<:{LWPW";
+
+    // 过期时间5分钟
+    private static final long EXPIRE_TIME = 10*60*1000;
 
     /**
      * 校验token是否正确

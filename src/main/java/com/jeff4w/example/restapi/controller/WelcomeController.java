@@ -8,6 +8,7 @@ import com.jeff4w.example.restapi.service.StudentService;
 import com.jeff4w.example.restapi.service.UserInfoService;
 import io.swagger.annotations.Api;
 import org.apache.shiro.authz.UnauthorizedException;
+import org.crazycake.shiro.RedisManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +26,18 @@ public class WelcomeController {
     @Autowired
     private UserInfoService userInfoService;
 
+    @Autowired
+    private RedisManager redisManager;
+
     @ResponseBody
     @PostMapping("/login")
     public ResponseResult<String> login(@RequestParam("username") String username,
                                 @RequestParam("password") String password) {
         UserInfo userInfo = userInfoService.findByUsername(username);
         if (userInfo.getPassword().equals(password)) {
-            return RestResultGenerator.genSuccessResult(JWTUtil.sign(username, password));
+            String flashToken = JWTUtil.sign(username, password);
+            redisManager.getJedisPool().getResource().set(flashToken, username,"NX", "EX",300);
+            return RestResultGenerator.genSuccessResult(flashToken);
         } else {
             throw new UnauthorizedException();
         }
