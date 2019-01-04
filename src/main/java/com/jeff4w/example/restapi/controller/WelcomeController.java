@@ -33,15 +33,21 @@ public class WelcomeController {
     @PostMapping("/login")
     public ResponseResult<String> login(@RequestParam("username") String username,
                                 @RequestParam("password") String password) {
-        UserInfo userInfo = userInfoService.findByUsername(username);
-        if (userInfo.getPassword().equals(password)) {
-            String flashToken = JWTUtil.sign(username, password);
-            String tmp = redisManager.getJedisPool().getResource().setex(username, 300, flashToken);
+        String flashToken = null;
+        try{
+            UserInfo userInfo = userInfoService.findByUsername(username);
+            if (userInfo.getPassword().equals(password)) {
+                flashToken = JWTUtil.sign(username, password);
+                String tmp = redisManager.getJedisPool().getResource().setex(username, 300, flashToken);
+            } else {
+                throw new UnauthorizedException();
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }finally {
             redisManager.getJedisPool().getResource().close();
-            return RestResultGenerator.genSuccessResult(flashToken);
-        } else {
-            throw new UnauthorizedException();
         }
+        return RestResultGenerator.genSuccessResult(flashToken);
     }
 
 }
